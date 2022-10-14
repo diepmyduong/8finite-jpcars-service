@@ -54,8 +54,8 @@ export default class JpcarsImageService extends Service {
 								try {
 									const filePath = new URL(picture).pathname.substring(1);
 									const result = await this.uploadImageFromUrl(picture, filePath);
-									console.log("Uploaded picture to S3:::" + result.Location);
-									return result.Location;
+
+									return result;
 								} catch (err) {
 									console.error("Error uploading picture to S3", err.message);
 									return picture;
@@ -106,7 +106,8 @@ export default class JpcarsImageService extends Service {
 					};
 
 					const result = await s3.upload(params).promise();
-					return result;
+					this.logger.info("Uploaded image to S3", result.Location);
+					return result.Location;
 				},
 				/** Init S3 Instance */
 				initS3: async () => {
