@@ -16,4 +16,10 @@ module.exports = {
 		bucket: null,
 		apiVersion: "2006-03-01",
 	},
+
+	/** JPCars Image Service */
+	jpcarsImage: {
+		/** Limit concurency image upload per request */
+		uploadPool: 20,
+	},
 };

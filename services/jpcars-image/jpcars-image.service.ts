@@ -15,28 +15,6 @@ export default class JpcarsImageService extends Service {
 		super(broker);
 		this.parseServiceSchema({
 			name: "jpcars-image",
-
-			/**
-			 * Service settings
-			 */
-			settings: {},
-
-			/**
-			 * Service metadata
-			 */
-			metadata: {},
-
-			/**
-			 * Service dependencies
-			 */
-			dependencies: [],
-
-			/**
-			 * Actions
-			 */
-
-			actions: {},
-
 			methods: {
 				start: async () => {
 					this.logger.info("Starting Upload JPCars Images:::::");
@@ -57,7 +35,8 @@ export default class JpcarsImageService extends Service {
 						this.logger.info(`Processing ${item.id}::: picture::: ${item.picture.length}`);
 
 						// Chunk image to max 20 images per request
-						const chunk = _.chunk(item.picture, 20);
+						const chunkSize = config.get<number>("jpcarsImage.uploadPool");
+						const chunk = _.chunk(item.picture, chunkSize);
 						let uploadImages: string[] = [];
 						for (const images of chunk) {
 							const uploaded = await Promise.all(

@@ -10,4 +10,7 @@ module.exports = {
 		bucket: "AWS_BUCKET",
 		apiVersion: "AWS_API_VERSION",
 	},
+	jpcarsImage: {
+		uploadPool: "JPCARS_IMAGE_UPLOAD_POOL",
+	},
 };
