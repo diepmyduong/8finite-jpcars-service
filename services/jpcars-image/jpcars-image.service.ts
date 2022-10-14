@@ -44,6 +44,7 @@ export default class JpcarsImageService extends Service {
 						.find({ picture: /^(?!https:\/\/jpcars-img).*/ })
 						.sort({ updated_at: 1 })
 						.select("_id picture")
+						.limit(30)
 						.cursor();
 
 					for await (const item of cursor) {
@@ -74,7 +75,27 @@ export default class JpcarsImageService extends Service {
 				 */
 				uploadImageFromUrl: async (url: string, filePath: string) => {
 					const res = await fetch(url);
+					/** if request has error
+					 * then return original url
+					 */
+					if (!res.ok) {
+						this.logger.error("Error fetching image from url", url);
+						return url;
+					}
+					/** if response is not image
+					 * then return original url
+					 */
+					if (!res.headers.get("content-type")?.startsWith("image")) {
+						this.logger.error("Response is not image", url);
+						return url;
+					}
+
 					const buffer = await res.buffer();
+					// /** download to tmp folder */
+					// const fileName = filePath.split("/").pop();
+					// const tmpFilePath = `/tmp/img/${fileName}`;
+					// fs.mkdirSync("/tmp/img", { recursive: true });
+					// fs.writeFileSync(tmpFilePath, await res.buffer());
 
 					const s3: AWS.S3 = this.metadata.$s3;
 
