@@ -8,6 +8,7 @@ import fetch from "node-fetch";
 import moment from "moment-timezone";
 
 import { Mongo } from "../../libs/mongo";
+import _ from "lodash";
 
 export default class JpcarsImageService extends Service {
 	public constructor(public broker: ServiceBroker) {
@@ -54,24 +55,32 @@ export default class JpcarsImageService extends Service {
 
 					for await (const item of cursor) {
 						this.logger.info(`Processing ${item.id}::: picture::: ${item.picture.length}`);
-						const uploadedImages = await Promise.all(
-							item.picture.map(async (picture: string) => {
-								try {
-									const filePath = new URL(picture).pathname.substring(1);
-									const result = await this.uploadImageFromUrl(picture, filePath);
 
-									return result;
-								} catch (err) {
-									console.error("Error uploading picture to S3", err.message);
-									return picture;
-								}
-							})
-						);
+						// Chunk image to max 20 images per request
+						const chunk = _.chunk(item.picture, 20);
+						let uploadImages: string[] = [];
+						for (const images of chunk) {
+							const uploaded = await Promise.all(
+								images.map(async (picture: string) => {
+									try {
+										const filePath = new URL(picture).pathname.substring(1);
+										const result = await this.uploadImageFromUrl(picture, filePath);
+
+										return result;
+									} catch (err) {
+										console.error("Error uploading picture to S3", err.message);
+										return picture;
+									}
+								})
+							);
+							uploadImages = uploadImages.concat(uploaded);
+						}
+
 						await model.updateOne(
 							{ _id: item._id },
 							{
 								$set: {
-									picture: uploadedImages,
+									picture: uploadImages,
 									picture_updated_at: picture_updated_at,
 								},
 							}
