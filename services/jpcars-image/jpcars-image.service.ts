@@ -5,6 +5,7 @@ import config from "config";
 import { Service, ServiceBroker } from "moleculer";
 import { Model, Schema } from "mongoose";
 import fetch from "node-fetch";
+import moment from "moment-timezone";
 
 import { Mongo } from "../../libs/mongo";
 
@@ -39,10 +40,14 @@ export default class JpcarsImageService extends Service {
 				start: async () => {
 					this.logger.info("Starting Upload JPCars Images:::::");
 					/** fetch items has image not upload yet */
-					const model: Model<{ picture: string[] }> = this.metadata.$model;
+					const model: Model<{ picture: string[]; picture_updated_at: string }> = this.metadata.$model;
+					const picture_updated_at = moment().format("YYYY-MM-DD");
 					const cursor = model
-						.find({ picture: /^(?!https:\/\/jpcars-img).*/ })
-						.sort({ updated_at: 1 })
+						.find({
+							picture: /^(?!https:\/\/jpcars-img).*/,
+							picture_updated_at: { $ne: picture_updated_at },
+						})
+						.sort({ updated_at: -1 })
 						.select("_id picture")
 						.limit(30)
 						.cursor();
@@ -62,7 +67,15 @@ export default class JpcarsImageService extends Service {
 								}
 							})
 						);
-						await model.updateOne({ _id: item._id }, { $set: { picture: uploadedImages } });
+						await model.updateOne(
+							{ _id: item._id },
+							{
+								$set: {
+									picture: uploadedImages,
+									picture_updated_at: picture_updated_at,
+								},
+							}
+						);
 
 						/** Delay random from 1 to 5 seconds */
 						const sleepTime = Math.floor(Math.random() * 5 + 1) * 1000;
@@ -125,6 +138,7 @@ export default class JpcarsImageService extends Service {
 					const schema = new Schema(
 						{
 							picture: { type: [String], required: true, default: [] },
+							picture_updated_at: { type: String },
 						},
 						{ collection: "items" }
 					);
@@ -143,9 +157,9 @@ export default class JpcarsImageService extends Service {
 				/** Start process */
 				while (true) {
 					await this.start();
-					/** Complete and delay 1 minute to restart again */
-					this.logger.info("Complete, delay 1 minute to restart again");
-					await sleep(60000);
+					/** Complete and delay 10 seconds to restart again */
+					this.logger.info("Complete, delay 10 second to restart again");
+					await sleep(10000);
 				}
 			},
 		});
