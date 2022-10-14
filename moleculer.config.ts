@@ -1,5 +1,7 @@
 "use strict";
-import {BrokerOptions, Errors, MetricRegistry, ServiceBroker} from "moleculer";
+import { BrokerOptions, Errors, MetricRegistry, ServiceBroker } from "moleculer";
+import dotenv from "dotenv";
+dotenv.config();
 
 /**
  * Moleculer ServiceBroker configuration file
@@ -26,6 +28,7 @@ import {BrokerOptions, Errors, MetricRegistry, ServiceBroker} from "moleculer";
  *    }
  *  }
  */
+
 const brokerConfig: BrokerOptions = {
 	// Namespace of nodes to segment your nodes on the same network.
 	namespace: "",
@@ -63,7 +66,7 @@ const brokerConfig: BrokerOptions = {
 
 	// Define a cacher.
 	// More info: https://moleculer.services/docs/0.14/caching.html
-    cacher: "Memory",
+	cacher: "Memory",
 
 	// Define a serializer.
 	// Available values: "JSON", "Avro", "ProtoBuf", "MsgPack", "Notepack", "Thrift".
@@ -181,7 +184,6 @@ const brokerConfig: BrokerOptions = {
 	started: async (broker: ServiceBroker): Promise<void> => {},
 	stopped: async (broker: ServiceBroker): Promise<void> => {},
 	 */
-
 };
 
 export = brokerConfig;
