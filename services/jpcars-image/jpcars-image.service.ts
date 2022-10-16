@@ -24,7 +24,7 @@ export default class JpcarsImageService extends Service {
 					const cursor = model
 						.find({
 							picture: /^(?!https:\/\/jpcars-img).*/,
-							picture_updated_at: { $ne: picture_updated_at },
+							status: "Available",
 						})
 						.sort({ updated_at: -1 })
 						.select("_id picture")
@@ -55,21 +55,20 @@ export default class JpcarsImageService extends Service {
 							uploadImages = uploadImages.concat(uploaded);
 						}
 
-						await model.updateOne(
-							{ _id: item._id },
-							{
-								$set: {
-									picture: uploadImages,
-									picture_updated_at: picture_updated_at,
-								},
-							}
-						);
+						const setData: any = { picture: uploadImages };
+
+						if (!item.picture[0].includes("jpcars-img")) {
+							setData.status = "OLD-DATA";
+						}
+
+						await model.updateOne({ _id: item._id }, { $set: setData });
 
 						/** Delay random from 1 to 5 seconds */
-						const sleepTime = Math.floor(Math.random() * 5 + 1) * 1000;
-						this.logger.info(`Sleeping for ${sleepTime}ms`);
-						await sleep(sleepTime);
+						// const sleepTime = Math.floor(Math.random() * 5 + 1) * 1000;
+						// this.logger.info(`Sleeping for ${sleepTime}ms`);
+						// await sleep(sleepTime);
 					}
+					cursor.close();
 				},
 				/** Fetch image from url
 				 * then upload to aws s3
@@ -127,6 +126,7 @@ export default class JpcarsImageService extends Service {
 						{
 							picture: { type: [String], required: true, default: [] },
 							picture_updated_at: { type: String },
+							status: { type: String },
 						},
 						{ collection: "items" }
 					);
