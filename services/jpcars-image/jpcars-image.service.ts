@@ -75,7 +75,8 @@ export default class JpcarsImageService extends Service {
 				 * then upload to aws s3
 				 */
 				uploadImageFromUrl: async (url: string, filePath: string) => {
-					const res = await fetch(url);
+					/** Set timeout to 30 second */
+					const res = await fetch(url, { timeout: 30000 });
 					/** if request has error
 					 * then return original url
 					 */
