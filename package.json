@@ -12,7 +12,8 @@
     "lint": "eslint --ext .js,.ts .",
     "dc:up": "docker-compose up --build -d",
     "dc:logs": "docker-compose logs -f",
-    "dc:down": "docker-compose down"
+    "dc:down": "docker-compose down",
+    "scrapper": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --config moleculer.config.ts services/**/scrapper.service.ts"
   },
   "keywords": [
     "microservices",
@@ -45,6 +46,7 @@
     "cheerio": "^1.0.0-rc.12",
     "config": "^3.3.8",
     "dotenv": "^16.0.3",
+    "fastq": "^1.13.0",
     "https-proxy-agent": "^5.0.1",
     "lodash": "^4.17.21",
     "moleculer": "^0.14.0",

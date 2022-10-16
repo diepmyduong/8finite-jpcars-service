@@ -188,7 +188,10 @@ function extractProductDetail(product: any, $: CheerioAPI) {
 	product.wheelbase = ($('th:contains("ホイールベース")').next().text() || "").trim();
 	product.vehicle_weight = ($('th:contains("車両重量")').next().text() || "").trim();
 	product.indoor = ($('th:contains("室内")').next().text() || "").trim();
-	product.JC08_fuel_economy = ($('th:contains("JC08燃費")').next().text() || "").trim();
+	const JC08_fuel_economy = ($('th:contains("JC08燃費")').next().text() || "").trim();
+	/** 19.8（km/L）' */
+	product.JC08_fuel_economy = Number((JC08_fuel_economy.split("（")[0] || "").trim());
+	product.JC08_fuel_economy_unit = (JC08_fuel_economy.split("（")[1] || "").slice(0, -1);
 	product.WLTC_fuel_economy = ($('th:contains("WLTC燃費")').next().text() || "").trim();
 	product.minimum_turning_radius = ($('th:contains("最小回転半径")').next().text() || "").trim();
 	product.number_of_sheet_rows = ($('th:contains("シート列数")').next().text() || "").trim();
