@@ -75,6 +75,12 @@ export default class JpcarsImageService extends Service {
 				 * then upload to aws s3
 				 */
 				uploadImageFromUrl: async (url: string, filePath: string) => {
+					/** Ignore spcical host */
+					const ignoreHosts = config.get<string[]>("jpcarsImage.ignoreHosts");
+					const host = new URL(url).host;
+					if (ignoreHosts.includes(host)) {
+						return url;
+					}
 					/** Set timeout to 30 second */
 					const res = await fetch(url, { timeout: 30000 });
 					/** if request has error

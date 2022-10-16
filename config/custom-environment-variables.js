@@ -12,5 +12,9 @@ module.exports = {
 	},
 	jpcarsImage: {
 		uploadPool: "JPCARS_IMAGE_UPLOAD_POOL",
+		ignoreHosts: {
+			__name: "JPCARS_IMAGE_IGNORE_HOSTS",
+			__format: "json",
+		},
 	},
 };
