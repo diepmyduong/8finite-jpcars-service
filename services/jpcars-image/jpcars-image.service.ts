@@ -61,8 +61,9 @@ export default class JpcarsImageService extends Service {
 							setData.status = "OLD-DATA";
 						}
 
+						this.logger.info("Updating item data::::", item._id);
 						await model.updateOne({ _id: item._id }, { $set: setData });
-
+						this.logger.info("Updated item data::::", item._id);
 						/** Delay random from 1 to 5 seconds */
 						// const sleepTime = Math.floor(Math.random() * 5 + 1) * 1000;
 						// this.logger.info(`Sleeping for ${sleepTime}ms`);
