@@ -77,8 +77,7 @@ export default class JpcarsImageService extends Service {
 				uploadImageFromUrl: async (url: string, filePath: string) => {
 					/** Ignore spcical host */
 					const ignoreHosts = config.get<string[]>("jpcarsImage.ignoreHosts");
-					const host = new URL(url).host;
-					if (ignoreHosts.includes(host)) {
+					if (ignoreHosts.includes(url)) {
 						return url;
 					}
 					/** Set timeout to 30 second */

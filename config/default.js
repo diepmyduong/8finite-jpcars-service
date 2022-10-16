@@ -22,6 +22,6 @@ module.exports = {
 		/** Limit concurency image upload per request */
 		uploadPool: 20,
 		/** Ignore fetch image hosts */
-		ignoreHosts: ["jpcars-img.s3-ap-southeast-1.amazonaws.com", "https://www.carsensor.net"],
+		ignoreHosts: ["jpcars-img.s3-ap-southeast-1.amazonaws.com", "www.carsensor.net"],
 	},
 };

@@ -129,7 +129,18 @@ const action: ActionSchema = {
 };
 
 function extractProductDetail(product: any, $: CheerioAPI) {
-	product.picture = extractPictures($);
+	product.picture = $(".subSliderMain__inner__set a")
+		.map((_, a) => $(a).attr("data-photo"))
+		.toArray()
+		.map((url) => {
+			if (url.startsWith("//")) {
+				return "https:" + url;
+			}
+			if (url.startsWith("/")) {
+				return "https://www.carsensor.net" + url;
+			}
+			return url;
+		});
 	product.doors = ($('th:contains("ドア数")').next().text() || "").trim();
 	product.seat_capacity = ($('th:contains("乗車定員")').next().text() || "").trim();
 	product.fuel = ($('th:contains("使用燃料")').next().text() || "").trim();
@@ -140,7 +151,7 @@ function extractProductDetail(product: any, $: CheerioAPI) {
 	product.engine_type = ($('th:contains("エンジン種別")').next().text() || "").trim();
 	product.model_year = $('.specWrap__box__title:contains("年式")').next().text();
 	product.repair_history = ($('th:contains("修復歴")').next().text() || "").trim();
-	product.mileage = ($('th:contains("走行距離")').next().text() || "").match(/\d+/g)?.join("");
+	product.mileage = (($('th:contains("走行距離")').next().text() || "").match(/\d+/g) || [])?.join("");
 	product.basic_spec_new_car = $('h2:contains("新車時の基本スペック")')
 		.children()
 		.text()
@@ -149,14 +160,22 @@ function extractProductDetail(product: any, $: CheerioAPI) {
 		.replace(")", "");
 
 	const productSize = ($('th:contains("車体寸法")').next().text() || "").trim();
-	product.length = (productSize.split("×")[0] || "").trim().match(/\d+/g)[0];
-	product.width = (productSize.split("×")[1] || "").trim().match(/\d+/g)[0];
-	product.height = (productSize.split("×")[2] || "").trim().match(/\d+/g)[0];
-	product.size_unit = productSize
-		.split("×")[2]
-		?.match(/\((\D+)\)/g)[0]
-		.replace("(", "")
-		.replace(")", "");
+	if (productSize) {
+		try {
+			product.length = (productSize.split("×")[0] || "").trim().match(/\d+/g)[0];
+			product.width = (productSize.split("×")[1] || "").trim().match(/\d+/g)[0];
+			product.height = (productSize.split("×")[2] || "").trim().match(/\d+/g)[0];
+			product.size_unit = productSize
+				.split("×")[2]
+				?.match(/\((\D+)\)/g)[0]
+				.replace("(", "")
+				.replace(")", "");
+		} catch (err) {
+			console.error("Error parsing product size", err, product);
+			console.log("productSize", productSize);
+		}
+	}
+
 	product.make = ($('link[href*="catalog"]:nth(0)').attr("href") || "").split("/")[4];
 	product.model = ($('link[href*="catalog"]:nth(1)').attr("href") || "").split("/")[5];
 	product.chassis_no = ($('th:contains("車台末尾番号")').next().text() || "").trim();
@@ -180,7 +199,7 @@ function extractProductDetail(product: any, $: CheerioAPI) {
 		delete product.reg_year;
 	}
 	product.inspection_year = ($('p:contains("車検有無")').next().text() || "").trim().slice(0, 4);
-	product.inspection_month = ($('p:contains("車検有無")').next().next().text() || "").trim().match(/\d+/g)[0];
+	product.inspection_month = (($('p:contains("車検有無")').next().next().text() || "").trim().match(/\d+/g) || [])[0];
 	product.reg_month = product.inspection_month;
 	if (product.inspection_month == "" || isNaN(product.inspection_month)) {
 		delete product.inspection_month;
@@ -195,12 +214,6 @@ function extractProductDetail(product: any, $: CheerioAPI) {
 	product.offer_price_unit = product.offer_price_unit.replace("万", "");
 	product.sale_price = product.offer_price;
 	product.sale_price_unit = product.offer_price_unit;
-}
-
-function extractPictures($: CheerioAPI): any {
-	return $(".subSliderMain__inner__set a")
-		.map((_, a) => $(a).attr("data-photo"))
-		.toArray();
 }
 
 export default action;
