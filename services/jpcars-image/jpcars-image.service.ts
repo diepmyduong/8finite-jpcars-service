@@ -22,13 +22,8 @@ export default class JpcarsImageService extends Service {
 					const model: Model<{ picture: string[]; picture_updated_at: string }> = this.metadata.$model;
 					const picture_updated_at = moment().format("YYYY-MM-DD");
 					const cursor = model
-						.find({
-							picture: /^(?!https:\/\/jpcars-img).*/,
-							status: "Available",
-						})
-						.sort({ updated_at: -1 })
+						.find({ picture_updated_at: { $exists: false } })
 						.select("_id picture")
-						.limit(30)
 						.cursor();
 
 					for await (const item of cursor) {
@@ -55,11 +50,7 @@ export default class JpcarsImageService extends Service {
 							uploadImages = uploadImages.concat(uploaded);
 						}
 
-						const setData: any = { picture: uploadImages };
-
-						if (!item.picture[0].includes("jpcars-img")) {
-							setData.status = "OLD-DATA";
-						}
+						const setData: any = { picture: uploadImages, picture_updated_at: picture_updated_at };
 
 						this.logger.info("Updating item data::::", item._id);
 						await model.updateOne({ _id: item._id }, { $set: setData });
@@ -110,6 +101,7 @@ export default class JpcarsImageService extends Service {
 						Bucket: config.get<string>("aws.bucket"),
 						Key: filePath,
 						Body: buffer,
+						ContentType: "image/jpeg",
 					};
 
 					const result = await s3.upload(params).promise();
@@ -138,6 +130,7 @@ export default class JpcarsImageService extends Service {
 						{ collection: "items" }
 					);
 					schema.index({ updated_at: 1 });
+					schema.index({ picture_updated_at: 1 });
 					const model = db.model("items", schema);
 					this.metadata.$model = model;
 				},
